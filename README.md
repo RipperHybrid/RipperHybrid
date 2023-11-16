@@ -1,8 +1,8 @@
 - 👋 Hi, I’m AshBorn
 - 🔭 I’m currently working on recovery for Nashc
-- ⚡ Fun fact: I AM THE DUMBEST HUMAN ALIVE
 - 📫 How to reach me: [AshBorn](https://t.me/Ripper_Hybrid)
 
+- ⚡ Fun fact: I AM THE DUMBEST HUMAN ALIVE
 <!--
 **RipperHybrid/RipperHybrid** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
 
