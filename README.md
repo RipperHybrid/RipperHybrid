@@ -1,5 +1,4 @@
 - 👋 Hi, I’m AshBorn
-- 🔭 I’m currently working on recovery for Nashc
 - 📫 How to reach me: [AshBorn](https://t.me/Ripper_Hybrid)
 
 - ⚡ Fun fact: I AM THE DUMBEST HUMAN ALIVE
