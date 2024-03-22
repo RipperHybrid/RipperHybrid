@@ -8,11 +8,7 @@
     <img src="https://img.shields.io/badge/Github-grey?style=for-the-badge&logo=github&logoColor=white" alt="Github Badge"/>
   </a>
 </div>
-  <h1>
-  Hey There
-  <img src="https://media.giphy.com/media/hvRJCLFzcasrR4ia7z/giphy.gif" width="30px"/>
-</h1>
-</div>
-<h3 align="left">Cute Visitor Counter</h3>
+<a href="https://git.io/typing-svg"><img src="https://readme-typing-svg.demolab.com?font=Asar&pause=1000&color=8771F7&center=true&random=false&width=435&lines=Hey%2C+I'm+AshBorn.;Just+a+newbie+in+the+coding+world.;Learning+and+exploring+new+things.;Feel+free+to+connect+and+learn+together!" alt="Typing SVG" /></a>
+  <h3 align="left">Cute Visitor Counter</h3>
 
 <img alt="view counter:Error!" width="400" src="https://count.getloli.com/get/@RipperHybrid?theme=moebooru" />
