@@ -13,5 +13,4 @@
   Hey There
   <img src="https://media.giphy.com/media/hvRJCLFzcasrR4ia7z/giphy.gif" width="30px"/>
 </h1>
-<a href="https://git.io/streak-stats"><img src="https://github-readme-streak-stats.herokuapp.com?user=RipperHybrid&theme=rising-sun&border_radius=4.0&card_width=400&hide_longest_streak=true" alt="GitHub Streak" /></a>
 </div>
