@@ -1,0 +1,164 @@
+name: Refresh Profile
+on:
+  schedule:
+    - cron: '0 0 1 * *'
+    - cron: '0 0 * * 0'
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/profile.yml'
+      - 'exclude.txt'
+
+permissions:
+  contents: write
+
+jobs:
+  update-profile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 1
+          persist-credentials: true
+
+      - name: Update Info
+        uses: actions/github-script@v6
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.BOTAPI }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          retries: 3
+          script: |
+            const fs = require('fs');
+            const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+            const CHAT_ID   = process.env.TELEGRAM_CHAT_ID;
+            const OWNER      = context.repo.owner;
+            const SELF_REPO = context.repo.repo;
+
+            const now   = new Date();
+            const since = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+
+            const safeBadgeText = (str) =>
+              encodeURIComponent(str.replace(/-/g, '--').replace(/_/g, '__').trim());
+
+            let excludedRepos = [];
+            if (fs.existsSync('exclude.txt')) {
+              excludedRepos = fs.readFileSync('exclude.txt', 'utf8')
+                .split('\n')
+                .map(line => line.trim())
+                .filter(line => line.length > 0);
+            }
+
+            const tgRes  = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getChat?chat_id=${CHAT_ID}`);
+            const tgData = await tgRes.json();
+            const res = tgData.result;
+
+            const displayName = res?.title ||
+                                (res?.first_name ? `${res.first_name}${res.last_name ? ' ' + res.last_name : ''}` : null) ||
+                                res?.username ||
+                                OWNER;
+
+            const channelLink = res?.username ? `https://t.me/${res.username}` : `https://t.me/Ripper_Hybrid`;
+
+            let audioInfo = '';
+            if (res?.first_profile_audio) {
+              const audio = res.first_profile_audio;
+              const title = audio.title || '';
+              const performer = audio.performer || '';
+              const clean = (audio.file_name || '').replace(/\s+/g, ' ').trim().replace(/\.m4a$/, '');
+              audioInfo = (title && performer) ? `${title} by ${performer}` : clean;
+              if (audioInfo.length > 60) audioInfo = audioInfo.substring(0, 57) + '...';
+            }
+
+            const allRepos = await github.paginate(github.rest.repos.listForUser, {
+              username: OWNER,
+              type: 'public',
+              sort: 'pushed',
+              direction: 'desc',
+              per_page: 100
+            });
+
+            const activeRepos = allRepos.filter(r =>
+              r.name !== SELF_REPO && !r.private && !excludedRepos.includes(r.name) &&
+              r.pushed_at && new Date(r.pushed_at) >= new Date(since)
+            );
+
+            const repoDetails = [];
+            for (const repo of activeRepos.slice(0, 6)) {
+              try {
+                const cRes = await github.rest.repos.listCommits({ owner: OWNER, repo: repo.name, since, per_page: 100 });
+                if (cRes.data.length === 0) continue;
+                const iRes = await github.rest.issues.listForRepo({ owner: OWNER, repo: repo.name, state: 'all', since, per_page: 100 });
+
+                let description = repo.description || 'No description provided.';
+                if (description.length > 85) {
+                  description = description.substring(0, 82) + '...';
+                }
+
+                repoDetails.push({
+                  name: repo.name,
+                  url: repo.html_url,
+                  desc: description,
+                  commits: cRes.data.length,
+                  issues: iRes.data.filter(i => !i.pull_request).length,
+                  prs: iRes.data.filter(i => i.pull_request).length
+                });
+              } catch (e) { continue; }
+            }
+
+            const monthLabel = now.toLocaleString('en-US', { month: 'long' });
+            const c = [];
+
+            c.push(`<div align="center">`);
+            c.push(`  <img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&weight=700&size=35&pause=1000&color=26A69A&center=true&vCenter=true&width=600&lines=Welcome+to+my+Profile;I'm+${encodeURIComponent(displayName)}" alt="Typing SVG" />`);
+            c.push(`  <p><i>Automatically updated activity report for <b>${monthLabel} ${now.getFullYear()}</b></i></p>`);
+            c.push(`</div>\n`);
+
+            c.push(`---\n\n### 🚀 Recent Activity\n`);
+
+            if (repoDetails.length > 0) {
+              c.push(`| Project | Description | Stats |`);
+              c.push(`| :--- | :--- | :--- |`);
+              for (const repo of repoDetails) {
+                const stats = [];
+                if (repo.commits > 0) stats.push(`🔨 **${repo.commits}**`);
+                if (repo.issues > 0) stats.push(`📦 **${repo.issues}**`);
+                if (repo.prs > 0) stats.push(`🔀 **${repo.prs}**`);
+                c.push(`| [**${repo.name}**](${repo.url}) | ${repo.desc} | ${stats.join(' ')} |`);
+              }
+            } else {
+              c.push(`> 🌿 **Status: Touching Grass**\n> Stepped away from the keyboard for a moment.`);
+            }
+
+            c.push(`\n---\n\n<div align="center">`);
+
+            const imgStyle = 'style="height: 20px !important; width: auto !important; margin-bottom: 4px;"';
+            const sp = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+            const bottomBadges = [];
+
+            bottomBadges.push(`<a href="${channelLink}"><img src="https://img.shields.io/badge/Telegram-${safeBadgeText(displayName)}-26A69A?style=plastic&logo=telegram&logoColor=white" ${imgStyle}/></a>`);
+            bottomBadges.push(`<a href="https://github.com/${OWNER}/${SELF_REPO}/actions/workflows/profile.yml"><img src="https://github.com/${OWNER}/${SELF_REPO}/actions/workflows/profile.yml/badge.svg?style=plastic" ${imgStyle}/></a>`);
+
+            if (audioInfo) {
+              bottomBadges.push(`<img src="https://img.shields.io/badge/Vibe-${safeBadgeText(audioInfo)}-1DB954?style=plastic&logo=spotify&logoColor=white" ${imgStyle}/>`);
+            }
+
+            c.push(bottomBadges.join(sp));
+            c.push(`</div>`);
+
+            const finalReadme = c.join('\n');
+            console.log("\n--- GENERATED README ---\n" + finalReadme);
+            fs.writeFileSync('README.md', finalReadme);
+
+      - name: Commit and Push
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add README.md
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m "Git: Update profile info" || exit 0
+          git push || exit 0
