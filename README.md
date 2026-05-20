@@ -9,9 +9,10 @@
 
 | Project | Description | Stats |
 | :--- | :--- | :--- |
+| [**AshLooper**](https://github.com/RipperHybrid/AshLooper) | A module designed to prevent boot loops caused by problematic modules installed vi... | 🔨 **2** |
 | [**Meta-Overlayfsx**](https://github.com/RipperHybrid/Meta-Overlayfsx) | Overlayfs fork featuring WebUI | 🔨 **1** |
 | [**AnyKernel3**](https://github.com/RipperHybrid/AnyKernel3) | AnyKernel, Evolved | 🔨 **4** |
-| [**FontCraft**](https://github.com/RipperHybrid/FontCraft) | Stylish fonts & emojis for a personalized experience. | 🔨 **4** 📦 **2** 🔀 **1** |
+| [**FontCraft**](https://github.com/RipperHybrid/FontCraft) | Stylish fonts & emojis for a personalized experience. | 🔨 **4** 📦 **3** 🔀 **1** |
 
 ---
 
