@@ -1,8 +1,8 @@
 name: Refresh Profile
 on:
   schedule:
-    - cron: '0 0 1 * *'
-    - cron: '0 0 * * 0'
+    # Runs at 00:00 every 2 days
+    - cron: '0 0 */2 * *'
   workflow_dispatch:
   push:
     paths:
@@ -34,7 +34,7 @@ jobs:
             const fs = require('fs');
             const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
             const CHAT_ID   = process.env.TELEGRAM_CHAT_ID;
-            const OWNER      = context.repo.owner;
+            const OWNER     = context.repo.owner;
             const SELF_REPO = context.repo.repo;
 
             const now   = new Date();
@@ -88,9 +88,13 @@ jobs:
             const repoDetails = [];
             for (const repo of activeRepos.slice(0, 6)) {
               try {
-                const cRes = await github.rest.repos.listCommits({ owner: OWNER, repo: repo.name, since, per_page: 100 });
-                if (cRes.data.length === 0) continue;
+                const cRes = await github.rest.repos.listCommits({ owner: OWNER, repo: repo.name, sha: repo.default_branch, since, per_page: 100 });
                 const iRes = await github.rest.issues.listForRepo({ owner: OWNER, repo: repo.name, state: 'all', since, per_page: 100 });
+                const relRes = await github.rest.repos.listReleases({ owner: OWNER, repo: repo.name, per_page: 100 });
+
+                const recentReleases = relRes.data.filter(r => r.published_at && new Date(r.published_at) >= new Date(since));
+
+                if (cRes.data.length === 0 && recentReleases.length === 0 && iRes.data.length === 0) continue;
 
                 let description = repo.description || 'No description provided.';
                 if (description.length > 85) {
@@ -103,7 +107,7 @@ jobs:
                   desc: description,
                   commits: cRes.data.length,
                   issues: iRes.data.filter(i => !i.pull_request).length,
-                  prs: iRes.data.filter(i => i.pull_request).length
+                  releases: recentReleases.length
                 });
               } catch (e) { continue; }
             }
@@ -124,8 +128,8 @@ jobs:
               for (const repo of repoDetails) {
                 const stats = [];
                 if (repo.commits > 0) stats.push(`🔨 **${repo.commits}**`);
+                if (repo.releases > 0) stats.push(`🏷️ **${repo.releases}**`);
                 if (repo.issues > 0) stats.push(`📦 **${repo.issues}**`);
-                if (repo.prs > 0) stats.push(`🔀 **${repo.prs}**`);
                 c.push(`| [**${repo.name}**](${repo.url}) | ${repo.desc} | ${stats.join(' ')} |`);
               }
             } else {
