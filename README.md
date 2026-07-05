@@ -7,8 +7,10 @@
 
 ### 🚀 Recent Activity
 
-> 🌿 **Status: Touching Grass**
-> Stepped away from the keyboard for a moment.
+| Project | Description | Stats |
+| :--- | :--- | :--- |
+| [**FontCraft**](https://github.com/RipperHybrid/FontCraft) | Stylish fonts & emojis for a personalized experience. | 🔨 **1** 🏷️ **1** 📦 **3** |
+| [**FontLib**](https://github.com/RipperHybrid/FontLib) | This repository serves as the remote asset database for the FontCraft module | 🔨 **5** |
 
 ---
 
