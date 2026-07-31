@@ -9,7 +9,7 @@
 
 | Project | Description | Stats |
 | :--- | :--- | :--- |
-| [**FontLib**](https://github.com/RipperHybrid/FontLib) | This repository serves as the remote asset database for the FontCraft module | 🔨 **12** 📦 **1** |
+| [**FontLib**](https://github.com/RipperHybrid/FontLib) | This repository serves as the remote asset database for the FontCraft module | 🔨 **16** 📦 **1** |
 | [**FontCraft**](https://github.com/RipperHybrid/FontCraft) | Stylish fonts & emojis for a personalized experience. | 🔨 **2** 🏷️ **2** 📦 **5** |
 
 ---
