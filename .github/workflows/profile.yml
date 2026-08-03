@@ -41,7 +41,7 @@ jobs:
             const since = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
 
             const safeBadgeText = (str) =>
-              encodeURIComponent(str.replace(/-/g, '--').replace(/_/g, '__').trim());
+              encodeURIComponent(str.replace(/-/g, '--').replace(/_/g, '__').trim()).replace(/%20/g, '%20');
 
             let excludedRepos = [];
             if (fs.existsSync('exclude.txt')) {
@@ -51,9 +51,14 @@ jobs:
                 .filter(line => line.length > 0);
             }
 
-            const tgRes  = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getChat?chat_id=${CHAT_ID}`);
-            const tgData = await tgRes.json();
-            const res = tgData.result;
+            let res = {};
+            try {
+              const tgRes  = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getChat?chat_id=${CHAT_ID}`);
+              const tgData = await tgRes.json();
+              res = tgData.result || {};
+            } catch (e) {
+              console.log('Telegram fetch failed, continuing without it:', e.message);
+            }
 
             const displayName = res?.title ||
                                 (res?.first_name ? `${res.first_name}${res.last_name ? ' ' + res.last_name : ''}` : null) ||
@@ -85,32 +90,75 @@ jobs:
               r.pushed_at && new Date(r.pushed_at) >= new Date(since)
             );
 
-            const repoDetails = [];
-            for (const repo of activeRepos.slice(0, 6)) {
-              try {
-                const cRes = await github.rest.repos.listCommits({ owner: OWNER, repo: repo.name, sha: repo.default_branch, since, per_page: 100 });
-                const iRes = await github.rest.issues.listForRepo({ owner: OWNER, repo: repo.name, state: 'all', since, per_page: 100 });
-                const relRes = await github.rest.repos.listReleases({ owner: OWNER, repo: repo.name, per_page: 100 });
+            // Fetch per-repo details in parallel, tolerating individual failures
+            const repoResults = await Promise.allSettled(
+              activeRepos.slice(0, 6).map(async (repo) => {
+                const [cRes, iRes, relRes, tagRes, langRes] = await Promise.all([
+                  github.rest.repos.listCommits({ owner: OWNER, repo: repo.name, sha: repo.default_branch, since, per_page: 100 }),
+                  github.rest.issues.listForRepo({ owner: OWNER, repo: repo.name, state: 'all', since, per_page: 100 }),
+                  github.rest.repos.listReleases({ owner: OWNER, repo: repo.name, per_page: 100 }),
+                  github.rest.repos.listTags({ owner: OWNER, repo: repo.name, per_page: 10 }),
+                  github.rest.repos.listLanguages({ owner: OWNER, repo: repo.name })
+                ]);
 
                 const recentReleases = relRes.data.filter(r => r.published_at && new Date(r.published_at) >= new Date(since));
+                const recentTags = tagRes.data.slice(0, recentReleases.length || 1);
 
-                if (cRes.data.length === 0 && recentReleases.length === 0 && iRes.data.length === 0) continue;
+                if (cRes.data.length === 0 && recentReleases.length === 0 && iRes.data.length === 0) {
+                  return null;
+                }
 
                 let description = repo.description || 'No description provided.';
                 if (description.length > 85) {
                   description = description.substring(0, 82) + '...';
                 }
 
-                repoDetails.push({
+                // Link targets: prefer a real release page, fall back to the tag's commit, then to latest commit
+                const latestRelease = recentReleases[0];
+                const latestTag = recentTags[0];
+                const latestCommit = cRes.data[0];
+
+                const releaseLink = latestRelease?.html_url
+                  || (latestTag ? `https://github.com/${OWNER}/${repo.name}/releases/tag/${latestTag.name}` : null)
+                  || (latestCommit ? latestCommit.html_url : repo.html_url);
+
+                const commitsLink = latestCommit
+                  ? latestCommit.html_url
+                  : `https://github.com/${OWNER}/${repo.name}/commits/${repo.default_branch}`;
+
+                const issuesLink = `https://github.com/${OWNER}/${repo.name}/issues?q=is%3Aissue+updated%3A%3E${since.split('T')[0]}`;
+
+                return {
                   name: repo.name,
                   url: repo.html_url,
                   desc: description,
                   commits: cRes.data.length,
                   issues: iRes.data.filter(i => !i.pull_request).length,
-                  releases: recentReleases.length
-                });
-              } catch (e) { continue; }
+                  releases: recentReleases.length,
+                  commitsLink,
+                  releaseLink,
+                  issuesLink,
+                  languages: langRes.data || {}
+                };
+              })
+            );
+
+            const repoDetails = repoResults
+              .filter(r => r.status === 'fulfilled' && r.value !== null)
+              .map(r => r.value);
+
+            // Aggregate language bytes across active repos for a Top Languages section
+            const langTotals = {};
+            for (const repo of repoDetails) {
+              for (const [lang, bytes] of Object.entries(repo.languages)) {
+                langTotals[lang] = (langTotals[lang] || 0) + bytes;
+              }
             }
+            const totalBytes = Object.values(langTotals).reduce((a, b) => a + b, 0);
+            const topLanguages = Object.entries(langTotals)
+              .sort((a, b) => b[1] - a[1])
+              .slice(0, 6)
+              .map(([lang, bytes]) => ({ lang, pct: totalBytes > 0 ? (bytes / totalBytes) * 100 : 0 }));
 
             const monthLabel = now.toLocaleString('en-US', { month: 'long' });
             const c = [];
@@ -127,13 +175,22 @@ jobs:
               c.push(`| :--- | :--- | :--- |`);
               for (const repo of repoDetails) {
                 const stats = [];
-                if (repo.commits > 0) stats.push(`🔨 **${repo.commits}**`);
-                if (repo.releases > 0) stats.push(`🏷️ **${repo.releases}**`);
-                if (repo.issues > 0) stats.push(`📦 **${repo.issues}**`);
+                if (repo.commits > 0) stats.push(`[🔨 **${repo.commits}**](${repo.commitsLink})`);
+                if (repo.releases > 0) stats.push(`[🏷️ **${repo.releases}**](${repo.releaseLink})`);
+                if (repo.issues > 0) stats.push(`[📦 **${repo.issues}**](${repo.issuesLink})`);
                 c.push(`| [**${repo.name}**](${repo.url}) | ${repo.desc} | ${stats.join(' ')} |`);
               }
             } else {
               c.push(`> 🌿 **Status: Touching Grass**\n> Stepped away from the keyboard for a moment.`);
+            }
+
+            if (topLanguages.length > 0) {
+              c.push(`\n---\n\n### 🧬 Top Languages This Month\n`);
+              for (const { lang, pct } of topLanguages) {
+                const filled = Math.round(pct / 5);
+                const bar = '█'.repeat(filled) + '░'.repeat(20 - filled);
+                c.push(`\`${lang.padEnd(12)}\` ${bar} ${pct.toFixed(1)}%  `);
+              }
             }
 
             c.push(`\n---\n\n<div align="center">`);
