@@ -28,7 +28,7 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.BOTAPI }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.PROFILE_PAT }}
           retries: 3
           script: |
             const fs = require('fs');
@@ -67,74 +67,41 @@ jobs:
 
             const channelLink = res?.username ? `https://t.me/${res.username}` : `https://t.me/Ripper_Hybrid`;
 
-            const allRepos = await github.paginate(github.rest.repos.listForUser, {
-              username: OWNER,
-              type: 'public',
+            let audioInfo = '';
+            if (res?.first_profile_audio) {
+              const audio = res.first_profile_audio;
+              const title = audio.title || '';
+              const performer = audio.performer || '';
+              const clean = (audio.file_name || '').replace(/\s+/g, ' ').trim().replace(/\.m4a$/, '');
+              audioInfo = (title && performer) ? `${title} by ${performer}` : clean;
+              if (audioInfo.length > 60) audioInfo = audioInfo.substring(0, 57) + '...';
+            }
+
+            const allRepos = await github.paginate(github.rest.repos.listForAuthenticatedUser, {
+              visibility: 'all',
+              affiliation: 'owner',
               sort: 'pushed',
               direction: 'desc',
               per_page: 100
             });
 
+            const includesPrivate = allRepos.some(r => r.private);
+
             const activeRepos = allRepos.filter(r =>
-              r.name !== SELF_REPO && !r.private && !excludedRepos.includes(r.name) &&
+              r.name !== SELF_REPO && !excludedRepos.includes(r.name) &&
               r.pushed_at && new Date(r.pushed_at) >= new Date(since)
             );
 
-            // Fetch per-repo details in parallel, tolerating individual failures
+            // Fetch language breakdown per repo in parallel, tolerating individual failures
             const repoResults = await Promise.allSettled(
               activeRepos.slice(0, 6).map(async (repo) => {
-                const [cRes, iRes, relRes, tagRes, langRes] = await Promise.all([
-                  github.rest.repos.listCommits({ owner: OWNER, repo: repo.name, sha: repo.default_branch, since, per_page: 100 }),
-                  github.rest.issues.listForRepo({ owner: OWNER, repo: repo.name, state: 'all', since, per_page: 100 }),
-                  github.rest.repos.listReleases({ owner: OWNER, repo: repo.name, per_page: 100 }),
-                  github.rest.repos.listTags({ owner: OWNER, repo: repo.name, per_page: 10 }),
-                  github.rest.repos.listLanguages({ owner: OWNER, repo: repo.name })
-                ]);
-
-                const recentReleases = relRes.data.filter(r => r.published_at && new Date(r.published_at) >= new Date(since));
-                const recentTags = tagRes.data.slice(0, recentReleases.length || 1);
-
-                if (cRes.data.length === 0 && recentReleases.length === 0 && iRes.data.length === 0) {
-                  return null;
-                }
-
-                let description = repo.description || 'No description provided.';
-                if (description.length > 85) {
-                  description = description.substring(0, 82) + '...';
-                }
-
-                // Link targets: prefer a real release page, fall back to the tag's commit, then to latest commit
-                const latestRelease = recentReleases[0];
-                const latestTag = recentTags[0];
-                const latestCommit = cRes.data[0];
-
-                const releaseLink = latestRelease?.html_url
-                  || (latestTag ? `https://github.com/${OWNER}/${repo.name}/releases/tag/${latestTag.name}` : null)
-                  || (latestCommit ? latestCommit.html_url : repo.html_url);
-
-                const commitsLink = latestCommit
-                  ? latestCommit.html_url
-                  : `https://github.com/${OWNER}/${repo.name}/commits/${repo.default_branch}`;
-
-                const issuesLink = `https://github.com/${OWNER}/${repo.name}/issues?q=is%3Aissue+updated%3A%3E${since.split('T')[0]}`;
-
-                return {
-                  name: repo.name,
-                  url: repo.html_url,
-                  desc: description,
-                  commits: cRes.data.length,
-                  issues: iRes.data.filter(i => !i.pull_request).length,
-                  releases: recentReleases.length,
-                  commitsLink,
-                  releaseLink,
-                  issuesLink,
-                  languages: langRes.data || {}
-                };
+                const langRes = await github.rest.repos.listLanguages({ owner: OWNER, repo: repo.name });
+                return { name: repo.name, languages: langRes.data || {} };
               })
             );
 
             const repoDetails = repoResults
-              .filter(r => r.status === 'fulfilled' && r.value !== null)
+              .filter(r => r.status === 'fulfilled')
               .map(r => r.value);
 
             // Aggregate language bytes across active repos for a Top Languages section
@@ -153,42 +120,23 @@ jobs:
             const monthLabel = now.toLocaleString('en-US', { month: 'long' });
             const c = [];
 
-            // Current focus: whichever active repo was pushed to most recently
-            const currentFocus = repoDetails.length > 0
-              ? activeRepos.find(r => r.name === repoDetails[0].name)
-              : (activeRepos[0] || null);
-
             c.push(`<div align="center">`);
             c.push(`  <h1>👋 ${displayName}</h1>`);
             c.push(`  <p><i>Automatically updated activity report for <b>${monthLabel} ${now.getFullYear()}</b></i></p>`);
-            if (currentFocus) {
-              c.push(`  <p>🔥 Currently focused on <a href="${currentFocus.html_url}"><b>${currentFocus.name}</b></a></p>`);
-            }
             c.push(`</div>\n`);
 
-            c.push(`---\n\n### 🚀 Recent Activity\n`);
-
-            if (repoDetails.length > 0) {
-              c.push(`| Project | Description | Stats |`);
-              c.push(`| :--- | :--- | :--- |`);
-              for (const repo of repoDetails) {
-                const stats = [];
-                if (repo.commits > 0) stats.push(`[🔨 **${repo.commits}**](${repo.commitsLink})`);
-                if (repo.releases > 0) stats.push(`[🏷️ **${repo.releases}**](${repo.releaseLink})`);
-                if (repo.issues > 0) stats.push(`[📦 **${repo.issues}**](${repo.issuesLink})`);
-                c.push(`| [**${repo.name}**](${repo.url}) | ${repo.desc} | ${stats.join(' ')} |`);
-              }
-            } else {
-              c.push(`> 🌿 **Status: Touching Grass**\n> Stepped away from the keyboard for a moment.`);
+            c.push(`---\n\n### 🧬 Top Languages This Month\n`);
+            if (includesPrivate) {
+              c.push(`<sub>🔒 includes private repositories</sub>\n`);
             }
-
             if (topLanguages.length > 0) {
-              c.push(`\n---\n\n### 🧬 Top Languages This Month\n`);
               for (const { lang, pct } of topLanguages) {
                 const filled = Math.round(pct / 5);
                 const bar = '█'.repeat(filled) + '░'.repeat(20 - filled);
                 c.push(`\`${lang.padEnd(12)}\` ${bar} ${pct.toFixed(1)}%  `);
               }
+            } else {
+              c.push(`> 🌿 No language data available for this month.`);
             }
 
             c.push(`\n---\n\n<div align="center">`);
@@ -199,7 +147,9 @@ jobs:
 
             bottomBadges.push(`<a href="${channelLink}"><img src="https://img.shields.io/badge/Telegram-${safeBadgeText(displayName)}-26A69A?style=plastic&logo=telegram&logoColor=white" ${imgStyle}/></a>`);
             bottomBadges.push(`<a href="https://github.com/${OWNER}/${SELF_REPO}/actions/workflows/profile.yml"><img src="https://github.com/${OWNER}/${SELF_REPO}/actions/workflows/profile.yml/badge.svg?style=plastic" ${imgStyle}/></a>`);
-            bottomBadges.push(`<img src="https://img.shields.io/badge/Active_Projects-${activeRepos.length}-26A69A?style=plastic&logo=github&logoColor=white" ${imgStyle}/>`);
+            if (audioInfo) {
+              bottomBadges.push(`<img src="https://img.shields.io/badge/Vibe-${safeBadgeText(audioInfo)}-1DB954?style=plastic&logo=spotify&logoColor=white" ${imgStyle}/>`);
+            }
 
             c.push(bottomBadges.join(sp));
             c.push(`</div>`);
