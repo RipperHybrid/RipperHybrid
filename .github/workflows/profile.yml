@@ -119,6 +119,8 @@ jobs:
 
             const monthLabel = now.toLocaleString('en-US', { month: 'long' });
             const c = [];
+            const imgStyle = 'style="height: 20px !important; width: auto !important; margin-bottom: 4px;"';
+            const sp = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
 
             c.push(`<div align="center">`);
             c.push(`  <h1>👋 ${displayName}</h1>`);
@@ -129,20 +131,26 @@ jobs:
             if (includesPrivate) {
               c.push(`<sub>🔒 includes private repositories</sub>\n`);
             }
+            c.push(`<div align="center">\n`);
             if (topLanguages.length > 0) {
-              for (const { lang, pct } of topLanguages) {
-                const filled = Math.round(pct / 5);
-                const bar = '█'.repeat(filled) + '░'.repeat(20 - filled);
-                c.push(`\`${lang.padEnd(12)}\` ${bar} ${pct.toFixed(1)}%  `);
-              }
+              const langColors = {
+                JavaScript: 'F7DF1E', TypeScript: '3178C6', Python: '3776AB', HTML: 'E34F26',
+                CSS: '1572B6', Shell: '89E051', Java: 'B07219', Kotlin: '7F52FF', C: '555555',
+                'C++': 'F34B7D', 'C#': '178600', Go: '00ADD8', Rust: 'DEA584', PHP: '4F5D95',
+                Ruby: '701516', Dart: '00B4AB', Swift: 'F05138'
+              };
+              const langBadges = topLanguages.map(({ lang, pct }) => {
+                const color = langColors[lang] || '26A69A';
+                return `<img src="https://img.shields.io/badge/${safeBadgeText(lang)}-${pct.toFixed(1)}%25-${color}?style=plastic&logoColor=white" ${imgStyle}/>`;
+              });
+              c.push(langBadges.join(sp));
             } else {
               c.push(`> 🌿 No language data available for this month.`);
             }
+            c.push(`\n</div>`);
 
             c.push(`\n---\n\n<div align="center">`);
 
-            const imgStyle = 'style="height: 20px !important; width: auto !important; margin-bottom: 4px;"';
-            const sp = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
             const bottomBadges = [];
 
             bottomBadges.push(`<a href="${channelLink}"><img src="https://img.shields.io/badge/Telegram-${safeBadgeText(displayName)}-26A69A?style=plastic&logo=telegram&logoColor=white" ${imgStyle}/></a>`);
