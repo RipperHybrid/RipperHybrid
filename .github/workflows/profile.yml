@@ -67,16 +67,6 @@ jobs:
 
             const channelLink = res?.username ? `https://t.me/${res.username}` : `https://t.me/Ripper_Hybrid`;
 
-            let audioInfo = '';
-            if (res?.first_profile_audio) {
-              const audio = res.first_profile_audio;
-              const title = audio.title || '';
-              const performer = audio.performer || '';
-              const clean = (audio.file_name || '').replace(/\s+/g, ' ').trim().replace(/\.m4a$/, '');
-              audioInfo = (title && performer) ? `${title} by ${performer}` : clean;
-              if (audioInfo.length > 60) audioInfo = audioInfo.substring(0, 57) + '...';
-            }
-
             const allRepos = await github.paginate(github.rest.repos.listForUser, {
               username: OWNER,
               type: 'public',
@@ -163,9 +153,17 @@ jobs:
             const monthLabel = now.toLocaleString('en-US', { month: 'long' });
             const c = [];
 
+            // Current focus: whichever active repo was pushed to most recently
+            const currentFocus = repoDetails.length > 0
+              ? activeRepos.find(r => r.name === repoDetails[0].name)
+              : (activeRepos[0] || null);
+
             c.push(`<div align="center">`);
-            c.push(`  <img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&weight=700&size=35&pause=1000&color=26A69A&center=true&vCenter=true&width=600&lines=Welcome+to+my+Profile;I'm+${encodeURIComponent(displayName)}" alt="Typing SVG" />`);
+            c.push(`  <h1>👋 ${displayName}</h1>`);
             c.push(`  <p><i>Automatically updated activity report for <b>${monthLabel} ${now.getFullYear()}</b></i></p>`);
+            if (currentFocus) {
+              c.push(`  <p>🔥 Currently focused on <a href="${currentFocus.html_url}"><b>${currentFocus.name}</b></a></p>`);
+            }
             c.push(`</div>\n`);
 
             c.push(`---\n\n### 🚀 Recent Activity\n`);
@@ -201,10 +199,7 @@ jobs:
 
             bottomBadges.push(`<a href="${channelLink}"><img src="https://img.shields.io/badge/Telegram-${safeBadgeText(displayName)}-26A69A?style=plastic&logo=telegram&logoColor=white" ${imgStyle}/></a>`);
             bottomBadges.push(`<a href="https://github.com/${OWNER}/${SELF_REPO}/actions/workflows/profile.yml"><img src="https://github.com/${OWNER}/${SELF_REPO}/actions/workflows/profile.yml/badge.svg?style=plastic" ${imgStyle}/></a>`);
-
-            if (audioInfo) {
-              bottomBadges.push(`<img src="https://img.shields.io/badge/Vibe-${safeBadgeText(audioInfo)}-1DB954?style=plastic&logo=spotify&logoColor=white" ${imgStyle}/>`);
-            }
+            bottomBadges.push(`<img src="https://img.shields.io/badge/Active_Projects-${activeRepos.length}-26A69A?style=plastic&logo=github&logoColor=white" ${imgStyle}/>`);
 
             c.push(bottomBadges.join(sp));
             c.push(`</div>`);
