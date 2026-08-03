@@ -9,7 +9,16 @@
 
 | Project | Description | Stats |
 | :--- | :--- | :--- |
-| [**FontCraft**](https://github.com/RipperHybrid/FontCraft) | Stylish fonts & emojis for a personalized experience. | 🔨 **1** 🏷️ **1** |
+| [**FontCraft**](https://github.com/RipperHybrid/FontCraft) | Stylish fonts & emojis for a personalized experience. | [🔨 **1**](https://github.com/RipperHybrid/FontCraft/commit/735e273eae2ab8819798685d047e384dbc5ffed8) [🏷️ **1**](https://github.com/RipperHybrid/FontCraft/releases/tag/v7.4) |
+
+---
+
+### 🧬 Top Languages This Month
+
+`JavaScript  ` ███████████░░░░░░░░░ 55.2%  
+`Shell       ` ████░░░░░░░░░░░░░░░░ 20.8%  
+`CSS         ` ███░░░░░░░░░░░░░░░░░ 16.7%  
+`HTML        ` █░░░░░░░░░░░░░░░░░░░ 7.3%  
 
 ---
 
