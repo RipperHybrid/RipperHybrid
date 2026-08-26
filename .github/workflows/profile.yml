@@ -1,7 +1,6 @@
 name: Refresh Profile
 on:
   schedule:
-    # Runs at 00:00 every 2 days
     - cron: '0 0 */2 * *'
   workflow_dispatch:
   push:
@@ -123,7 +122,6 @@ jobs:
             const sp = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
 
             c.push(`<div align="center">`);
-            c.push(`  <h1>👋 ${displayName}</h1>`);
             c.push(`  <p><i>Automatically updated activity report for <b>${monthLabel} ${now.getFullYear()}</b></i></p>`);
             c.push(`</div>\n`);
 
