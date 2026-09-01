@@ -1,5 +1,5 @@
 <div align="center">
-  <p><i>Automatically updated activity report for <b>August 2026</b></i></p>
+  <p><i>Automatically updated activity report for <b>September 2026</b></i></p>
 </div>
 
 ---
@@ -10,7 +10,7 @@
 
 <div align="center">
 
-<img src="https://img.shields.io/badge/Python-42.9%25-3776AB?style=plastic&logoColor=white" style="height: 20px !important; width: auto !important; margin-bottom: 4px;"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://img.shields.io/badge/JavaScript-19.7%25-F7DF1E?style=plastic&logoColor=white" style="height: 20px !important; width: auto !important; margin-bottom: 4px;"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://img.shields.io/badge/CSS-10.5%25-1572B6?style=plastic&logoColor=white" style="height: 20px !important; width: auto !important; margin-bottom: 4px;"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://img.shields.io/badge/Kotlin-10.3%25-7F52FF?style=plastic&logoColor=white" style="height: 20px !important; width: auto !important; margin-bottom: 4px;"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://img.shields.io/badge/Shell-6.3%25-89E051?style=plastic&logoColor=white" style="height: 20px !important; width: auto !important; margin-bottom: 4px;"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://img.shields.io/badge/C%2B%2B-4.6%25-F34B7D?style=plastic&logoColor=white" style="height: 20px !important; width: auto !important; margin-bottom: 4px;"/>
+<img src="https://img.shields.io/badge/C%2B%2B-93.1%25-F34B7D?style=plastic&logoColor=white" style="height: 20px !important; width: auto !important; margin-bottom: 4px;"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://img.shields.io/badge/Meson-6.9%25-26A69A?style=plastic&logoColor=white" style="height: 20px !important; width: auto !important; margin-bottom: 4px;"/>
 
 </div>
 
