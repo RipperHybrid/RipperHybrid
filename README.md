@@ -10,7 +10,7 @@
 
 <div align="center">
 
-<img src="https://img.shields.io/badge/C%2B%2B-93.1%25-F34B7D?style=plastic&logoColor=white" style="height: 20px !important; width: auto !important; margin-bottom: 4px;"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://img.shields.io/badge/Meson-6.9%25-26A69A?style=plastic&logoColor=white" style="height: 20px !important; width: auto !important; margin-bottom: 4px;"/>
+<img src="https://img.shields.io/badge/Python-50.2%25-3776AB?style=plastic&logoColor=white" style="height: 20px !important; width: auto !important; margin-bottom: 4px;"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://img.shields.io/badge/Shell-33.7%25-89E051?style=plastic&logoColor=white" style="height: 20px !important; width: auto !important; margin-bottom: 4px;"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://img.shields.io/badge/JavaScript-5.5%25-F7DF1E?style=plastic&logoColor=white" style="height: 20px !important; width: auto !important; margin-bottom: 4px;"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://img.shields.io/badge/C%2B%2B-5.4%25-F34B7D?style=plastic&logoColor=white" style="height: 20px !important; width: auto !important; margin-bottom: 4px;"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://img.shields.io/badge/CSS-2.4%25-1572B6?style=plastic&logoColor=white" style="height: 20px !important; width: auto !important; margin-bottom: 4px;"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://img.shields.io/badge/HTML-1.7%25-E34F26?style=plastic&logoColor=white" style="height: 20px !important; width: auto !important; margin-bottom: 4px;"/>
 
 </div>
 
