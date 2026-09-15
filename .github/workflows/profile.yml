@@ -24,10 +24,10 @@ jobs:
       - name: Update Info
         uses: actions/github-script@v6
         env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.BOTAPI }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.RIPPER_HYBRID }}
         with:
-          github-token: ${{ secrets.PROFILE_PAT }}
+          github-token: ${{ secrets.GHTOKEN }}
           retries: 3
           script: |
             const fs = require('fs');
