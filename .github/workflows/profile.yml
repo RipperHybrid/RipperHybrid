@@ -10,9 +10,56 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 jobs:
+  cleanup-old-runs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete old runs of this workflow
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const KEEP = 1;
+            const MAX_AGE_DAYS = 1;
+
+            const workflow_id = 'profile.yml';
+            const cutoff = new Date(Date.now() - MAX_AGE_DAYS * 24 * 60 * 60 * 1000);
+
+            const runs = await github.paginate(
+              github.rest.actions.listWorkflowRuns,
+              {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id,
+                per_page: 100
+              }
+            );
+
+            runs.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+            const toDelete = runs.slice(KEEP).filter(r =>
+              new Date(r.created_at) < cutoff &&
+              r.status === 'completed'
+            );
+
+            console.log(`Total runs: ${runs.length}, deleting: ${toDelete.length}`);
+
+            for (const run of toDelete) {
+              try {
+                await github.rest.actions.deleteWorkflowRun({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  run_id: run.id
+                });
+                console.log(`Deleted run #${run.run_number} (${run.id}) from ${run.created_at}`);
+              } catch (e) {
+                console.log(`Failed to delete run ${run.id}: ${e.message}`);
+              }
+            }
+
   update-profile:
+    needs: cleanup-old-runs
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -91,7 +138,6 @@ jobs:
               r.pushed_at && new Date(r.pushed_at) >= new Date(since)
             );
 
-            // Fetch language breakdown per repo in parallel, tolerating individual failures
             const repoResults = await Promise.allSettled(
               activeRepos.slice(0, 6).map(async (repo) => {
                 const langRes = await github.rest.repos.listLanguages({ owner: OWNER, repo: repo.name });
@@ -103,7 +149,6 @@ jobs:
               .filter(r => r.status === 'fulfilled')
               .map(r => r.value);
 
-            // Aggregate language bytes across active repos for a Top Languages section
             const langTotals = {};
             for (const repo of repoDetails) {
               for (const [lang, bytes] of Object.entries(repo.languages)) {
