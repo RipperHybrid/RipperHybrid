@@ -1,5 +1,5 @@
 <div align="center">
-  <p><i>Automatically updated activity report for <b>September 2026</b></i></p>
+  <p><i>Automatically updated activity report for <b>October 2026</b></i></p>
 </div>
 
 ---
@@ -10,7 +10,7 @@
 
 <div align="center">
 
-<img src="https://img.shields.io/badge/Python-38.9%25-3776AB?style=plastic&logoColor=white" style="height: 20px !important; width: auto !important; margin-bottom: 4px;"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://img.shields.io/badge/Shell-26.4%25-89E051?style=plastic&logoColor=white" style="height: 20px !important; width: auto !important; margin-bottom: 4px;"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://img.shields.io/badge/JavaScript-19.6%25-F7DF1E?style=plastic&logoColor=white" style="height: 20px !important; width: auto !important; margin-bottom: 4px;"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://img.shields.io/badge/CSS-9.7%25-1572B6?style=plastic&logoColor=white" style="height: 20px !important; width: auto !important; margin-bottom: 4px;"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://img.shields.io/badge/Rust-2.7%25-DEA584?style=plastic&logoColor=white" style="height: 20px !important; width: auto !important; margin-bottom: 4px;"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://img.shields.io/badge/HTML-2.4%25-E34F26?style=plastic&logoColor=white" style="height: 20px !important; width: auto !important; margin-bottom: 4px;"/>
+<img src="https://img.shields.io/badge/JavaScript-50.4%25-F7DF1E?style=plastic&logoColor=white" style="height: 20px !important; width: auto !important; margin-bottom: 4px;"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://img.shields.io/badge/CSS-27.6%25-1572B6?style=plastic&logoColor=white" style="height: 20px !important; width: auto !important; margin-bottom: 4px;"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://img.shields.io/badge/Rust-12.0%25-DEA584?style=plastic&logoColor=white" style="height: 20px !important; width: auto !important; margin-bottom: 4px;"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://img.shields.io/badge/Shell-9.5%25-89E051?style=plastic&logoColor=white" style="height: 20px !important; width: auto !important; margin-bottom: 4px;"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://img.shields.io/badge/HTML-0.5%25-E34F26?style=plastic&logoColor=white" style="height: 20px !important; width: auto !important; margin-bottom: 4px;"/>
 
 </div>
 
